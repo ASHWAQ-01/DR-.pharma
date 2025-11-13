@@ -482,6 +482,7 @@
         }
 
         // --- RENDER DRUG INFO ---
+        // --- RENDER DRUG INFO ---
         function renderDrugInfo(drugId, drugData) {
             drugDetailsContent.classList.add('hidden');
             drugDetailsContent.innerHTML = ''; 
@@ -516,6 +517,7 @@
 
                 html = `<h2 class="text-2xl font-bold mb-4 icon-heading"><i class="fa-solid fa-capsules text-blue-500"></i><span>${drug.name}</span></h2>`;
                 
+                // Basic Details Grid
                 html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm mb-6 border-b pb-4">`;
                 if (drug.genericName) html += `<div><strong>Generic Name:</strong> ${drug.genericName}</div>`;
                 if (drug.brandNames?.length) html += `<div><strong>Brand Names:</strong> ${drug.brandNames.join(', ')}</div>`;
@@ -524,12 +526,43 @@
                 if (drug.pregnancyCategory) html += `<div><strong>Pregnancy Category:</strong> ${drug.pregnancyCategory}</div>`;
                 html += `</div>`;
                 
+                // Indications
                 if (drug.indications) html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-book-medical fa-fw text-blue-500"></i><span>Indications</span></h3><p class="text-sm break-words">${drug.indications}</p></div>`;
 
+                // MOA
                 if (drug.moaSteps?.length) {
                     html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-diagram-project fa-fw text-blue-500"></i><span>Mechanism of Action</span></h3><div class="flowchart-container">${drug.moaSteps.map(step => `<div class="flowchart-step text-sm break-words">${step}</div>`).join('')}</div></div>`;
                 }
 
+                // Pharmacokinetics (Added Section)
+                if (drug.pharmacokinetics) {
+                    html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-flask fa-fw text-green-600"></i><span>Pharmacokinetics</span></h3>
+                             <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-sm space-y-3 border border-gray-200 dark:border-gray-600">`;
+                    
+                    if (drug.pharmacokinetics.absorption) html += `<div><span class="font-bold text-gray-700 dark:text-gray-300">Absorption:</span> <span class="text-gray-600 dark:text-gray-400">${drug.pharmacokinetics.absorption}</span></div>`;
+                    if (drug.pharmacokinetics.distribution) html += `<div><span class="font-bold text-gray-700 dark:text-gray-300">Distribution:</span> <span class="text-gray-600 dark:text-gray-400">${drug.pharmacokinetics.distribution}</span></div>`;
+                    if (drug.pharmacokinetics.metabolism) html += `<div><span class="font-bold text-gray-700 dark:text-gray-300">Metabolism:</span> <span class="text-gray-600 dark:text-gray-400">${drug.pharmacokinetics.metabolism}</span></div>`;
+                    if (drug.pharmacokinetics.excretion) html += `<div><span class="font-bold text-gray-700 dark:text-gray-300">Excretion:</span> <span class="text-gray-600 dark:text-gray-400">${drug.pharmacokinetics.excretion}</span></div>`;
+                    
+                    html += `</div></div>`;
+                }
+
+                // Dosage
+                if (drug.dose) {
+                    html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-syringe fa-fw text-blue-500"></i><span>Dose & Dosage</span></h3>`;
+                    if (typeof drug.dose === 'object') {
+                        html += `<div class="space-y-3 text-sm p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">`;
+                        if (drug.dose.initialDose) html += `<div><strong class="block text-blue-600 dark:text-blue-400">Initial Dose:</strong><p class="break-words">${drug.dose.initialDose}</p></div>`;
+                        if (drug.dose.maxDose) html += `<div><strong class="block text-blue-600 dark:text-blue-400">Maximum Dose:</strong><p class="break-words">${drug.dose.maxDose}</p></div>`;
+                        if (drug.dose.notes) html += `<div class="mt-2 pt-2 border-t border-[var(--border-color)]"><strong class="block">Notes:</strong><p class="text-xs italic break-words">${drug.dose.notes}</p></div>`;
+                        html += `</div>`;
+                    } else {
+                        html += `<p class="text-sm break-words">${drug.dose}</p>`;
+                    }
+                    html += `</div>`;
+                }
+
+                // Adverse Effects
                 if (drug.adverseEffects && (drug.adverseEffects.common?.length || drug.adverseEffects.serious?.length)) {
                     html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-face-grimace fa-fw text-orange-500"></i><span>Adverse Effects</span></h3><div class="space-y-4">`;
                     if (drug.adverseEffects.common?.length) {
@@ -540,33 +573,40 @@
                     }
                     html += `</div></div>`;
                 }
-
-                if (drug.dose) {
-                    html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-syringe fa-fw text-blue-500"></i><span>Dose & Dosage</span></h3>`;
-                    if (typeof drug.dose === 'object') {
-                        html += `<div class="space-y-3 text-sm p-4 rounded-lg border border-gray-200 dark:border-gray-700">`;
-                        if (drug.dose.initialDose) html += `<div><strong class="block">Initial Dose:</strong><p class="break-words">${drug.dose.initialDose}</p></div>`;
-                        if (drug.dose.maxDose) html += `<div><strong class="block">Maximum Dose:</strong><p class="break-words">${drug.dose.maxDose}</p></div>`;
-                        if (drug.dose.notes) html += `<div class="mt-2 pt-2 border-t border-[var(--border-color)]"><strong class="block">Notes:</strong><p class="text-xs italic break-words">${drug.dose.notes}</p></div>`;
-                        html += `</div>`;
-                    } else {
-                        html += `<p class="text-sm break-words">${drug.dose}</p>`;
-                    }
-                    html += `</div>`;
-                }
                 
+                // Contraindications
                 if (drug.contraindications?.length) html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-ban fa-fw text-red-500"></i><span>Contraindications</span></h3><ul class="list-disc list-inside text-sm space-y-1">${drug.contraindications.map(item => `<li class="break-words">${item}</li>`).join('')}</ul></div>`;
                 
+                // Precautions
                 if (drug.precautions?.length) {
                     html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-shield-halved fa-fw text-orange-500"></i><span>Precautions</span></h3><ul class="list-disc list-inside text-sm space-y-2">${drug.precautions.map(item => {
                         if (item.startsWith('BOXED WARNING')) {
-                            return `<li class="p-3 bg-red-100 border-l-4 border-red-500 text-red-700 list-none -ml-5 break-words">${item.replace('BOXED WARNING', '<strong class="font-bold text-red-800">BOXED WARNING</strong>')}</li>`;
+                            return `<li class="p-3 bg-red-100 border-l-4 border-red-500 text-red-700 list-none -ml-5 break-words rounded-r-md">${item.replace('BOXED WARNING', '<strong class="font-bold text-red-800">BOXED WARNING</strong>')}</li>`;
                         } else {
                             return `<li class="break-words">${item}</li>`;
                         }
                     }).join('')}</ul></div>`;
                 }
+
+                // Risk Factors (Added Section)
+                if (drug.riskFactors?.length) {
+                     html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-person-circle-exclamation fa-fw text-yellow-600"></i><span>Risk Factors</span></h3><ul class="list-disc list-inside text-sm space-y-1">${drug.riskFactors.map(item => `<li class="break-words">${item}</li>`).join('')}</ul></div>`;
+                }
+
+                // Lactation (Added Section)
+                if (drug.lactationInfo) {
+                    html += `<div class="mb-6"><h3 class="text-xl font-semibold mb-2 icon-subheading"><i class="fa-solid fa-person-breastfeeding fa-fw text-pink-400"></i><span>Lactation</span></h3><p class="text-sm break-words bg-pink-50 dark:bg-gray-700 p-3 rounded-lg border border-pink-100 dark:border-gray-600">${drug.lactationInfo}</p></div>`;
+                }
             }
+
+            setTimeout(() => {
+                drugDetailsContent.innerHTML = html;
+                drugDetailsSkeleton.classList.add('hidden');
+                drugDetailsContent.classList.remove('hidden');
+                drugDetailsContent.classList.add('animate-fade-in');
+                drugDetailsContent.addEventListener('animationend', () => drugDetailsContent.classList.remove('animate-fade-in'), { once: true });
+            }, 500);
+        }
 
             setTimeout(() => {
                 drugDetailsContent.innerHTML = html;
@@ -1147,4 +1187,5 @@
         }
     </script>
 </body>
+
 </html>
